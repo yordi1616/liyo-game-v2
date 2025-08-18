@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIYO ጌም - መግቢያ</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f2f5; /* Light yellowish/greyish */
+            background: linear-gradient(135deg, #FFDA22, #FFC000); /* Yellowish gradient */
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.9); /* Slightly transparent white */
+            padding: 40px 60px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+        }
+        h1 {
+            font-family: 'Impact', sans-serif; /* Example for bold, unique font */
+            font-size: 4em;
+            color: #48f; /* LIYO text color */
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 5px rgba(0, 0, 0, 0.3);
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 15px 10px;
+            margin-bottom: 10px;
+            border: 2px solid #007bff; /* Blue border for input */
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 1.1em;
+            background-color: #e0f2ff; /* Light blue background */
+            color: #333;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #007bff; /* Blue button */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .flash-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>LIYO</h1>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flash-message">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+        <form action="{{ url_for('login') }}" method="post">
+            <div class="input-group">
+                <input type="text" name="username" placeholder="ስምህን አስገባ" required>
+            </div>
+            <button type="submit">ግባ</button>
+        </form>
+    </div>
+</body>
+</html>
