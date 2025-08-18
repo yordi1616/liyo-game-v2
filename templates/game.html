@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIYO ጌም</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #FFC000; /* Yellowish background */
+            color: black; /* Black text for clarity on yellowish background */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* To push nav to bottom */
+            align-items: center;
+            min-height: 100vh;
+        }
+        .main-content {
+            flex-grow: 1; /* Allows main content to take available space */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .score-display {
+            font-size: 4em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: black;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .tap-info {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #555;
+        }
+        .click-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background-color: white;
+            border: 4px solid black; /* Black border as per design */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Impact', sans-serif;
+            font-size: 5em;
+            color: #48f; /* LIYO text color */
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s ease-in-out;
+            user-select: none; /* Prevent text selection */
+        }
+        .click-button:active {
+            transform: scale(0.95);
+        }
+        .tap-limit-bar-container {
+            width: 80%;
+            background-color: #ddd;
+            border-radius: 10px;
+            height: 20px;
+            margin-top: 30px;
+            overflow: hidden;
+            border: 1px solid #777;
+        }
+        .tap-limit-bar {
+            height: 100%;
+            background-color: #4CAF50; /* Green bar */
+            width: 100%; /* Will be set by JS */
+            border-radius: 10px;
+            transition: width 0.3s ease-in-out;
+        }
+        .tap-limit-text {
+            text-align: center;
+            margin-top: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        .flash-message {
+            color: red;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Daily Bonus Pop-up */
+        .daily-bonus-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .daily-bonus-box {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            color: black;
+        }
+        .daily-bonus-box h2 {
+            margin-top: 0;
+            font-size: 2em;
+            color: #4CAF50; /* Green for bonus */
+        }
+        .daily-bonus-box .points {
+            font-size: 1.8em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .daily-bonus-box .claim-button {
+            padding: 12px 25px;
+            background-color: #4CAF50; /* Green button */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .daily-bonus-box .claim-button:hover {
+            background-color: #45a049;
+        }
+
+        /* Navigation Bar */
+        .navbar {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7); /* Dark semi-transparent */
+            padding: 10px 0;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            position: sticky;
+            bottom: 0;
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            font-size: 1.1em;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .navbar a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <ul class="flash-message">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="score-display">{{ "{:,.0f}".format(score) }}</div>
+        <div class="tap-info">በአንድ መጫን: +{{ per_tap_bonus }}</div>
+        
+        <form action="{{ url_for('click') }}" method="post">
+            <button type="submit" class="click-button">LIYO</button>
+        </form>
+
+        <div class="tap-limit-bar-container">
+            <div class="tap-limit-bar" style="width: {{ (taps_left / current_tap_limit) * 100 if current_tap_limit > 0 else 0 }}%;"></div>
+        </div>
+        <div class="tap-limit-text">{{ "{:,.0f}".format(taps_left) }} / {{ "{:,.0f}".format(current_tap_limit) }}</div>
+    </div>
+
+    {% if show_daily_bonus %}
+    <div class="daily-bonus-overlay">
+        <div class="daily-bonus-box">
+            <h2>እንኳን ደህና መጣህ!</h2>
+            <p class="points">1000 ነጥብ ማበረታቻ</p>
+            <form action="{{ url_for('claim_daily_bonus') }}" method="post">
+                <button type="submit" class="claim-button">Claim</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="navbar">
+        <a href="{{ url_for('game') }}">Home</a>
+        <a href="{{ url_for('task_page') }}">Task</a>
+        <a href="{{ url_for('earn_page') }}">Earn</a>
+        <a href="{{ url_for('members_page') }}">Members</a>
+    </div>
+</body>
+</html>
